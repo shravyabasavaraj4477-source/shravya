@@ -1,0 +1,253 @@
+import os
+import sys
+
+# -----------------------------------------------------------------
+# 1. THIRD-PARTY PACKAGES CHECK
+# If pandas, numpy, or matplotlib are missing, the program will explain how to install them.
+# -----------------------------------------------------------------
+try:
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+except ImportError:
+    print("\n[Dependency Notice] Some data science libraries are missing.")
+    print("Please run this command in your terminal/command prompt to install them:")
+    print("pip install numpy pandas matplotlib")
+    print("\nExiting program so you can install these first. See you in a moment!")
+    sys.exit(1)
+
+
+# -----------------------------------------------------------------
+# GLOBAL DATA STRUCTURES & CONFIGURATIONS
+# -----------------------------------------------------------------
+# Memory storage for students (Lab 3 Structure: List of Dictionaries)
+students_db = []
+
+# Mock event tracking groups (Lab 3 Structure: Sets)
+sports_set = {"Amit", "Rahul", "Priya", "Sneha"}
+cultural_set = {"Rahul", "Sneha", "Kiran", "Arjun"}
+
+
+# -----------------------------------------------------------------
+# CORE FUNCTION MODULES (Labs 1, 4, 5, 6, 7, 8)
+# -----------------------------------------------------------------
+
+# LAB 1: Grade Evaluator
+def check_grade(score):
+    if score >= 90: return "A", "Excellent"
+    elif score >= 75: return "B", "Very Good"
+    elif score >= 60: return "C", "Good"
+    elif score >= 40: return "D", "Average"
+    else: return "F", "Needs Improvement"
+
+# LAB 5: Fee Calculation Function
+def calculate_total_fee(tuition, hostel=0, transport=0):
+    return tuition + hostel + transport
+
+# LAB 4: Sorting & Searching (Bubble Sort & Binary Search)
+def sort_students_by_id():
+    n = len(students_db)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if students_db[j]['id'] > students_db[j+1]['id']:
+                # Swap elements
+                students_db[j], students_db[j+1] = students_db[j+1], students_db[j]
+
+def binary_search_student(target_id):
+    low = 0
+    high = len(students_db) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if students_db[mid]['id'] == target_id:
+            return mid  # Target index found
+        elif students_db[mid]['id'] < target_id:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1  # Target not found
+
+# LAB 6: File Management (Save data to file)
+def save_data_to_file():
+    try:
+        with open("campus_records.txt", "w") as file:
+            file.write("ID,Name,Score,Grade\n")
+            for s in students_db:
+                file.write(f"{s['id']},{s['name']},{s['score']},{s['grade']}\n")
+        print("\n[Success] Records successfully written to 'campus_records.txt'!")
+    except Exception as e:
+        print(f"File write operation failed: {e}")
+
+# LAB 7: Directory Scanning with Exception Handling
+def scan_folder(folder_path):
+    try:
+        if not os.path.exists(folder_path):
+            raise FileNotFoundError(f"The path '{folder_path}' does not exist.")
+        
+        print(f"\n--- Scanning Contents of: {folder_path} ---")
+        for item in os.listdir(folder_path):
+            print(f" -> {item}")
+    except FileNotFoundError as err:
+        print(f"[Error Handled]: {err}")
+    except Exception as err:
+        print(f"[Unexpected Error]: {err}")
+
+# LAB 8: Simplified Performance Analytics (Data Tools)
+def run_analytics():
+    csv_file = "student_performance.csv"
+    
+    # Auto-generate a dummy CSV file if it doesn't exist yet to guarantee execution
+    if not os.path.exists(csv_file):
+        dummy_data = {
+            "Name": ["Amit", "Rahul", "Priya", "Sneha", "Kiran"],
+            "Math": [88, 72, 95, 61, 84],
+            "Science": [92, 81, 89, 70, 78],
+            "English": [79, 85, 91, 65, 88]
+        }
+        pd.DataFrame(dummy_data).to_csv(csv_file, index=False)
+        print(f"[Info] Generated a sample data sheet '{csv_file}' for analysis.")
+
+    try:
+        # 1. Pandas Operations
+        df = pd.read_csv(csv_file)
+        print("\n--- Student Dataset (Pandas Dataframe) ---")
+        print(df)
+        
+        # 2. NumPy Operations
+        subjects = ["Math", "Science", "English"]
+        num_matrix = df[subjects].to_numpy()
+        
+        print("\n--- Class performance Statistics (NumPy) ---")
+        averages = np.mean(num_matrix, axis=0)
+        for i, sub in enumerate(subjects):
+            print(f"Average score in {sub}: {averages[i]:.1f}")
+            
+        # 3. Matplotlib Visual Chart
+        print("\n[Visualizer] Generating chart window...")
+        plt.figure(figsize=(6, 4))
+        plt.bar(subjects, averages, color=['skyblue', 'lightgreen', 'coral'])
+        plt.title("Class Averages Overview")
+        plt.ylabel("Scores")
+        plt.ylim(0, 100)
+        plt.show()
+        
+    except Exception as e:
+        print(f"Analytics Pipeline Error: {e}")
+
+
+# -----------------------------------------------------------------
+# MAIN SYSTEM APPLICATION DASHBOARD
+# -----------------------------------------------------------------
+def dashboard():
+    while True:
+        print("\n" + "="*45)
+        print("    SMART CAMPUS SYSTEM MENU")
+        print("="*45)
+        print("1. Register Student & Evaluate Grade (Lab 1)")
+        print("2. Course Enrollment Manager (Lab 2)")
+        print("3. View Memory Records & Event Sets (Lab 3)")
+        print("4. Search Student Profile by ID (Lab 4)")
+        print("5. Run Fee Assessment Engine (Lab 5)")
+        print("6. Export Student Records to Text File (Lab 6)")
+        print("7. Scan Local System Folders (Lab 7)")
+        print("8. Display Performance Analytics Chart (Lab 8)")
+        print("9. Shutdown Application")
+        print("="*45)
+        
+        choice = input("Select an option (1-9): ").strip()
+        
+        if choice == "1":
+            print("\n--- Student Registration ---")
+            try:
+                s_id = int(input("Enter Student ID (Numbers only): "))
+                name = input("Enter Student Name: ").strip()
+                score = float(input("Enter Exam Score (0-100): "))
+                
+                grade, remark = check_grade(score)
+                
+                # Append student data dict to global list
+                students_db.append({
+                    "id": s_id,
+                    "name": name,
+                    "score": score,
+                    "grade": grade,
+                    "courses": []
+                })
+                print(f"Student {name} registered! Evaluated Grade: {grade} ({remark})")
+            except ValueError:
+                print("[Input Error]: Please insert numbers where required.")
+
+        elif choice == "2":
+            print("\n--- Course Enrollment Management ---")
+            if not students_db:
+                print("No students profiles loaded yet. Add one first via option 1.")
+                continue
+            
+            # Pick the first student profile in memory for ease of demonstration
+            student = students_db[0]
+            print(f"Managing course selection for: {student['name']} (ID: {student['id']})")
+            
+            # Simple loop rule tracking (max 3 courses allowed in this simple version)
+            while len(student['courses']) < 3:
+                course = input("Enter a course title (or type 'done' to stop): ").strip()
+                if course.lower() == 'done':
+                    break
+                if course:
+                    student['courses'].append(course)
+                    print(f"-> Linked '{course}' successfully.")
+            print(f"Current enrolled list: {student['courses']}")
+
+        elif choice == "3":
+            print("\n--- In-Memory Data Records Overview ---")
+            print("Registered Students:", students_db)
+            print("\n--- Campus Group Memberships (Sets Operations) ---")
+            print("Sports Group:", sports_set)
+            print("Cultural Group:", cultural_set)
+            print("Students in BOTH groups:", sports_set.intersection(cultural_set))
+
+        elif choice == "4":
+            print("\n--- Search and Sorting System ---")
+            if not students_db:
+                print("Database is empty. Populate profiles first.")
+                continue
+            try:
+                search_id = int(input("Enter Student ID to find: "))
+                sort_students_by_id() # Ensure data is sorted first
+                
+                found_idx = binary_search_student(search_id)
+                if found_idx != -1:
+                    match = students_db[found_idx]
+                    print(f"[Match Found!]: Name: {match['name']}, Grade: {match['grade']}")
+                else:
+                    print("Student ID not found in records registry.")
+            except ValueError:
+                print("Invalid input value.")
+
+        elif choice == "5":
+            print("\n--- Fee Calculation Subsystem ---")
+            try:
+                base_fee = float(input("Enter Tuition Base amount: "))
+                hostel_fee = float(input("Enter Hostel Charge (Enter 0 if None): "))
+                total = calculate_total_fee(base_fee, hostel_fee)
+                print(f"Net Student Dues Balance: {total} INR")
+            except ValueError:
+                print("Numerical configuration parsing error.")
+
+        elif choice == "6":
+            save_data_to_file()
+
+        elif choice == "7":
+            path_to_check = input("\nEnter a path folder directory to scan (e.g., '.' for current folder): ").strip()
+            scan_folder(path_to_check)
+
+        elif choice == "8":
+            run_analytics()
+
+        elif choice == "9":
+            print("\nClosing Smart Campus application dashboard. Goodbye!")
+            break
+        else:
+            print("Invalid input sequence option. Please select 1 through 9.")
+
+# Start execution
+if __name__ == "__main__":
+    dashboard()
